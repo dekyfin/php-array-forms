@@ -1,18 +1,18 @@
-#php-array-forms
+# php-array-forms
 A library that allows you to create HTML forms using PHP Arrays. The project was inspired by Titan Framework and uses the same format for generating elements
-##INSTALLATION
+## INSTALLATION
 
-###Composer
+### Composer
 `composer require dekyfin/php-array-forms`
 
-###Direct Install
+### Direct Install
 
 ##USAGE
 -Include the `DF\ArrayForm` class
 --Composer: `require_once "vendor/autoload.php"`
 --Direct Install: `require_once "path/to/ArrayForm.php"`
 
-###Example
+### Example
 ```
 #Attributes to be used for the form
 $formData = [
@@ -56,9 +56,9 @@ $html = $form->$build();
 
 echo $html
 ```
-##OPTIONS
+## OPTIONS
 
-##formData
+## formData
 
-##elements
+## elements
 
