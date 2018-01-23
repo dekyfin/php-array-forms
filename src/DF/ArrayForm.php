@@ -19,10 +19,16 @@ class ArrayForm {
 	protected $formNo = 0;
 	protected $id;
 
-	public function __construct( $formData, $elements ){
-		$this->formData = $formData;
+	public function __construct( Array $formData, Array $elements ){
+		$this->formData = array_merge(
+			[
+				"method" => "post",
+				"display" => "table"
+			 ],
+			$formData
+		);
 		$this->elements = $elements;
-		$this->id = rand (9,1000);
+		$this->id = isset( $formData["id"] ) ? $formData["id"] :  rand (9,1000);
 	}
 
 	/**
@@ -168,11 +174,27 @@ INPUT;
 	}
 
 	protected function printOutput( $output ){
+
+		$formData = $this->formData;
+		$classes = $formData["class"];
+		
+		unset( 
+			$formData["id"],
+			$formData["class"],
+			$formData["class"]
+		);
+
+		foreach( $formData as $attr=>$val ){
+
+			$val = htmlspecialchars( $val );
+			$attributes .= "$attr='$val' ";
+		}
+
 		//HTML wrapper for all inputs
 		$wrapper = ( $this->formData["display"] == "table" ) ? ["<table class='DFForm-table'>","</table>"] : ["",""];
 
 		return "
-		<form id='DFF$this->id-$this->formNo' class='DFForm'>
+		<form id='DFF$this->id-$this->formNo' class='DFForm $class' $attributes>
 			$wrapper[0] $output $wrapper[1]
 		</form>";
 	}
