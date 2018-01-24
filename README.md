@@ -1,4 +1,4 @@
-# php-array-forms
+# PHP ARRAY FORMS
 A library that allows you to create HTML forms using PHP Arrays. The project was inspired by Titan Framework and uses the same format for generating elements
 ## INSTALLATION
 
@@ -27,13 +27,13 @@ $elements = [
 		"id" => "email",
 		"name" => "Email",
 		"type" => "email"
+		"required" => true,
 	],
 	[
 		"id" => "pass",
 		"name" => "Password",
-		"type" => "number",
-		"step" => "0.01",
-		"min" => "3",
+		"type" => "password",
+		"required" => true,
 	],
 	[
 		"id" => "amount",

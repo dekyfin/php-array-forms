@@ -23,7 +23,8 @@ class ArrayForm {
 		$this->formData = array_merge(
 			[
 				"method" => "post",
-				"display" => "table"
+				"display" => "table",
+				"action" => ""
 			 ],
 			$formData
 		);
@@ -65,15 +66,16 @@ class ArrayForm {
 		foreach ($this->elements as $element ) {
 
 			//Values to be reset for each input
-			$opts = $input = $label = $attributes = "";
+			$opts = $input = $hidden = $label = $attributes = "";
 
 
 			//Extract key data from attributes
 			$id = htmlspecialchars( $element["id"] );
 			$name = htmlspecialchars( $element["name"] );
 			$options = $element["options"] ;
+			$wrapper = isset( $element["wrapper"] ) ? $element["wrapper"] : [] ;
 			$default = htmlspecialchars( $element["default"] );
-			$type = htmlspecialchars( $element["type"] );
+			$type = isset($element["type"]) ? htmlspecialchars( $element["type"] ) : "text";
 
 
 
@@ -82,6 +84,7 @@ class ArrayForm {
 				$element["name"],
 				$element["options"],
 				$element["type"],
+				$element["wrapper"],
 				$element["default"]
 			);
 
@@ -94,20 +97,30 @@ class ArrayForm {
 				$val = htmlspecialchars( $val );
 
 				if( gettype( $val )  === true ){
-					$attributes .= "$attr='$attr' ";
+					$attributes .= "$attr=\"$attr\" ";
 				}
 				if( gettype( $val )  === false ){
 
 				}
 				else{
-					$attributes .= "$attr='$val' ";
+					$attributes .= "$attr=\"$val\" ";
 				}
 			}
 
+			//Create Attributes
+			$wrapper_attr = "";
+			foreach( $wrapper as $attr=> $val ){
+
+				$val = htmlspecialchars( $val );
+				$wrapper_attr .= "$attr=\"$val\" ";
+			}
+
 			//Create options
+			$label = "<label for=\"$inputID\">$name</label>";
+
 			switch ( $type ) {
-				case 'textarea':
-					$input = "<textarea id='$inputID' name='$id' value='$default' $attributes></textarea>";
+				case "textarea":
+					$input = "<textarea id=\"$inputID\" name=\"$id\" value=\"$default\" $attributes></textarea>";
 				break;
 				case "select":
 					foreach( $options as $key => $val ){
@@ -116,11 +129,11 @@ class ArrayForm {
 						}
 						else{
 							$key = htmlspecialchars( $key );
-							$value = "value='$key'";
+							$value = "value=\"$key\"";
 						}
 						$opts .= "\n		<option $value>$val</option>";
 					}
-					$input = "<select id='$inputID' name='$id' $attributes value='$default'>$opts\n	</select>";
+					$input = "<select id=\"$inputID\" name=\"$id\" $attributes value=\"$default\">$opts\n	</select>";
 
 				break;
 				case "radio":
@@ -128,31 +141,41 @@ class ArrayForm {
 					foreach( $options as $key=>$val ){
 						if( is_numeric( $key ) ){
 							$val = htmlspecialchars( $val );
-							$value = "value='$val'";
+							$value = "value=\"$val\"";
 						}
 						else{
 							$key = htmlspecialchars( $key );
-							$value = "value='$key'";
+							$value = "value=\"$key\"";
 						}
-						$input .= "\n<label><input type='$type' name='$id' $attributes $value/>$val</label>";
+						$input .= "\n<label><input type=\"$type\" name=\"$id\" $attributes $value/>$val</label>";
 					}
 
 				break;
-				case 'submit':
-					$input = '<input type="submit" name="' . $id . '" value="' . $name . '">';
-					$label = '';
+				case "submit":
+					$input = "<input type=\"submit\" name=\"$id\" value=\"$name\">";
+					$label = "";
+				break;
+				case "custom":
+					$input = $element["custom"];
+					$label = "";
 				break;
 				default:
-					$input = "<input id='$inputID' type='$type' name='$id' $attributes />";
-				break;
+					$input = "<input id=\"$inputID\" type=\"$type\" name=\"$id\" $attributes value=\"$default\" />";
+
+			}
+
+			//Do not display hidden forms
+			if( $type == "hidden" ){
+				$hidden .= $input;
+				continue;
 			}
 
 			switch ( $this->formData["display"] ){
 
 				case "table":
 					$output .=<<<INPUT
-					<tr>
-						<td class="DFForm-input-title"><label for="$inputID">$name</label></td>
+					<tr $wrapper_attr>
+						<td class="DFForm-input-title">$label</td>
 						<td class="DFForm-input-content">$input</td>
 					</tr>
 INPUT;
@@ -160,8 +183,8 @@ INPUT;
 
 				default:
 					$output .=<<<INPUT
-					<div class="DFForm-input">
-						<div><label for="$inputID">$name</label></div>
+					<div $wrapper_attr class="DFForm-input-wrap">
+						$label
 						<div>$input</div>
 					</div>
 INPUT;
@@ -170,13 +193,16 @@ INPUT;
 
 		}
 
-		return $output;
+		return [$output, $hidden ];
 	}
 
-	protected function printOutput( $output ){
+	protected function printOutput( $inputs ){
+
+		$output = $inputs[0];
+		$hidden = $inputs[1];
 
 		$formData = $this->formData;
-		$classes = $formData["class"];
+		$class = $formData["class"];
 		
 		unset( 
 			$formData["id"],
@@ -196,6 +222,7 @@ INPUT;
 		return "
 		<form id='DFF$this->id-$this->formNo' class='DFForm $class' $attributes>
 			$wrapper[0] $output $wrapper[1]
+			$hidden
 		</form>";
 	}
  }
